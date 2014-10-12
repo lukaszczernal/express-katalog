@@ -35,32 +35,34 @@ angular.module('app.controllers', ['ui.sortable'])
 ])
 
 
-.controller('PagesCtrl', ($scope, $q, pagesSrv) ->
+.controller('PagesCtrl', ($scope, $q, pagesSrv, $filter) ->
 
   $scope.pages    = []
   $scope.tileSize = 'm-smallTiles'
-  
+
   $scope.cutting      = false
   $scope.cutPageIndex = null
+  $scope.isPreview    = false
+  $scope.isLoading    = false
 
   $scope.cutPage = (index) ->
     $scope.cutting      = true
     $scope.cutPageIndex = index
 
   $scope.pastePage = (index) ->
-    cutPage = $scope.pages[$scope.cutPageIndex]         # GET PAGE WE WANT TO MOVE    
+    cutPage = $scope.pages[$scope.cutPageIndex]         # GET PAGE WE WANT TO MOVE
     $scope.pages.splice index, 0, cutPage               # PASTE THE PAGE
-    
+
     # CUT OUT the PAGE from an OLD PLACE
-    # IF THE PAGE WAS TAKEN FROM SUBSEQUENT PLACE THEN THE ONE THAT WAS CHOSEN 
+    # IF THE PAGE WAS TAKEN FROM SUBSEQUENT PLACE THEN THE ONE THAT WAS CHOSEN
     # TO PLACE THE PAGE THAN WE NED TO ADJUST ITS INDEX
-    $scope.cutPageIndex++ if index <= $scope.cutPageIndex   
-    $scope.pages.splice $scope.cutPageIndex, 1  
+    $scope.cutPageIndex++ if index <= $scope.cutPageIndex
+    $scope.pages.splice $scope.cutPageIndex, 1
 
     $scope.cutting = false
     $scope.save()
- 
-  $scope.sortPages = 
+
+  $scope.sortPages =
     stop: (e, ui) ->
       $scope.save()
 
@@ -95,12 +97,14 @@ angular.module('app.controllers', ['ui.sortable'])
     pagesSrv.delete(index)
     .error (status, error) ->
       console.log 'delete error: ', response, error
-      
+
   $scope.upload = (form) ->
     pagesSrv.upload(form)
+    .always ->
+      $scope.hideLoader()
 
   $scope.edit = (index) ->
-    pagesSrv.edit(index)   
+    pagesSrv.edit(index)
 
   $scope.pdf = (pages) ->
     pagesSrv.pdf(pages)
@@ -111,6 +115,21 @@ angular.module('app.controllers', ['ui.sortable'])
 
   $scope.print = (page) ->
     pagesSrv.pdf(page)
+
+  $scope.preview = (page) ->
+    previewPage = $scope.pages[page].svg.file
+    $scope.previewImgURL = "jpg/w800/" + $filter('encodeFilename')(previewPage) + ".jpg"
+    $scope.isPreview = true
+
+  $scope.hidePreview = () ->
+    $scope.isPreview = false
+
+  $scope.showLoader = () ->
+    $scope.$apply () ->
+      $scope.isLoading = true
+
+  $scope.hideLoader = () ->
+    $scope.isLoading = false
 
   $scope.loadpages()
 )

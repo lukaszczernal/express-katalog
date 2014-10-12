@@ -4,7 +4,7 @@
 
 angular.module('app.services', [])
 
-.factory 'version', -> 
+.factory 'version', ->
 	"0.2"
 
 # .factory 'pages', ($rootScope, $http, $q) ->
@@ -43,9 +43,11 @@ angular.module('app.services', [])
     $(form).ajaxSubmit
       url: 'http://localhost:3000/api/add'
       type: 'POST'
+      timeout: 600000 # have you ever seen a 10min timeout? I bet not.
       success: (response) ->
         def.resolve response
       error: (response) ->
+        console.log('srv upload error');
         def.reject response
 
     def.promise()

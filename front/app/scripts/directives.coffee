@@ -56,7 +56,13 @@ angular.module('app.directives', [
 		form = element.find('form')
 		input = form.find('input[type="file"]')
 
-		form.bind 'change', ->
+		input.bind 'change', ->
+			scope.showLoader()
+			form.submit()
+
+		form.bind 'submit', (e) ->
+			e.preventDefault()
+
 			if attrs.index?		# REPLACING SELECTED PAGE WITH NEW VERSION
 				upload(@)
 				.done (res) ->
@@ -87,6 +93,7 @@ angular.module('app.directives', [
 					def.reject res
 
 			.fail (failResp) ->
+				console.log('directive upload fail');
 				onUploadPageFail failResp
 				def.reject failResp
 
@@ -114,23 +121,23 @@ angular.module('app.directives', [
 			scope.edit index
 			false
 
-.directive 'cut', () ->
-	(scope, element, attrs) ->
-		$(element).click (e) ->
-			e.preventDefault()
-			index = attrs.index
+# .directive 'cut', () ->
+# 	(scope, element, attrs) ->
+# 		$(element).click (e) ->
+# 			e.preventDefault()
+# 			index = attrs.index
 
-			# SET ISCUT SELECTION FOR THIS PAGE
-			# scope.isCut = true
+# 			# SET ISCUT SELECTION FOR THIS PAGE
+# 			# scope.isCut = true
 
-			# if (scope.cutting && scope.isCut) || not scope.cutting
-			# 	scope.isCut = !scope.isCut
-			# 	scope.setCutting scope.isCut, index
-			# 	scope.$apply()
+# 			# if (scope.cutting && scope.isCut) || not scope.cutting
+# 			# 	scope.isCut = !scope.isCut
+# 			# 	scope.setCutting scope.isCut, index
+# 			# 	scope.$apply()
 
-			scope.$apply(attrs.cut)
+# 			scope.$apply(attrs.cut)
 
-			false
+# 			false
 
 .directive 'paste', () ->
 	(scope, element, attrs) ->

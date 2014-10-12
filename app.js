@@ -5,7 +5,6 @@
 
 var express   = require('express')
   , routes    = require('./routes')
-  , user      = require('./routes/user')
   , http      = require('http')
   , path      = require('path')
   , PDFCreator  = require('./lib/createpdf').PDFCreator
@@ -13,8 +12,11 @@ var express   = require('express')
   , fs  = require('fs')
   , spawn = require('child_process').spawn
   , utils = require('./lib/utils').utils
-  , FormData    = require('form-data')
-  , httpRequest = require('request');
+  , httpRequest = require('request')
+  , FSDeferred = require('./lib/fsdeferred')
+  , PageFiles = require('./lib/pagefiles')
+  , Q = require('q')
+  , _ = require('lodash');
 
 var app = express();
 var issaving = false;
@@ -55,23 +57,148 @@ if ('development' == app.get('env')) {
 }
 
 
-// var SvgFiles = new ReadFolder('svg');
-
 app.get('/', function(req, res) {
   res.render('index', {title: 'Katalog', env: app.get('env')});
 });
 
-//API STARTS HERE
+app.get('/update-json-file', function(req, res) {
+  FSDeferred.readFile('data/pages-array.json').then(function(data){
+    var pages = JSON.parse(data);
+    var i = 0;
+    pages.every(function(page, index, array){
+      var _file = page.svg.file;
+      var _newFile = utils.encodeFilename(_file);
+      var _path = 'public/svg/' + _file;
+      var _newPath = 'public/svg/' + _newFile;
+      fs.exists(_path, function(exists) {
+        if(!exists) {
+          fs.exists(_newPath, function(exists) {
+            if (exists) {
+              console.log(++i, index, _newPath);
+              array[index].svg.file = _newFile;
+              array[index].svg.path = _newPath;
+            } else {
+              console.log(_newPath, ' does not exists');
+            }
+
+          });
+        };
+      });
+
+      // console.log('array.length', array.length);
+      // if (index == array.length) return false
+      return true;
+    });
+    setTimeout(function() {
+      var pagesData = JSON.stringify(pages);
+      var duplicatefile = function(err) {
+        if (err) {
+          var status = JSON.stringify({status: 'err', message: 'Error 2. Cannot read JSON file containing pages'});
+          res.send(status);
+        } else {
+          fs.writeFile('public/data/pages-array.json', pagesData , function() {
+            console.log('done');
+          });
+        }
+      }
+
+      fs.writeFile('public/data/tmp.pages-array.json', pagesData , duplicatefile);
+    }, 4000);
+
+  });
+});
+
+app.get('/update-svg-filename', function(req, res) {
+
+  FSDeferred.readFile('data/pages-array.json').then(function(data){
+    var pages = JSON.parse(data);
+    pages.every(function(page, index, array){
+      var _file = page.svg.file;
+      var _newFile = utils.encodeFilename(_file);
+      var _path = 'public/svg/' + _file;
+      var _newPath = 'public/svg/' + _newFile;
+
+      if (_file != _newFile) {
+        console.log(_file, index);
+        fs.rename(_path, _newPath, function(err) {
+          if ( err ) console.log('ERROR: ' + err);
+        });
+      };
+
+      return true;
+    });
+  });
+
+});
 
 //READ FOLDER VERSION
-// app.get('/api/pages', function(req, res) {
-// 	var renderView = function(err, pages) {
-// 		if (err) console.log('Error. Cannot read folder.');
-//     res.send(pages);
-// 	};
+app.get('/integrity', function(req, res) {
+	var renderView = function(data) {
+    res.render('integrity', {title: 'Integrity', data: data});
+    // res.send(data); //TODO send only JSON
+	};
 
-// 	files = SvgFiles.read(renderView);
-// });
+  var promises = [];
+
+  // FIRST PROMISE IS TO GET JSON FILE
+  promises.push(FSDeferred.readFile('data/pages-array.json'));
+
+  // REST PROMISES RELATES TO FOLDER READS
+  PageFiles.folders.forEach(function(folder){
+    promises.push(FSDeferred.readdir(folder, (function(folder) {
+      return function(data) {     // WRAPPER - WRAPS RESULT OF FOLDER READ
+        var obj = {};
+        obj.name = folder;
+        obj.count = data.length;
+        obj.files = data;
+        return obj;
+      };
+    })(folder)));
+  });
+
+
+  Q.all(promises).then(function(data) {
+    var viewData = {};
+    var pagesArray = data.shift();   // THIS IS JSON CONTENT (PAGES-ARRAY.JSON)
+        pagesArray = JSON.parse(pagesArray);
+
+    viewData.folders = data         // THIS IS ARRAY WITH JPG FOLDERS OBJECT (NAME, COUNT, FILES)
+    viewData.files = [];
+
+    // FILENAMES TABLE LABELS
+    viewData.files.push(['File name']);
+    var folderNames = _.flatten(viewData.folders, 'name');
+    viewData.files[0] = viewData.files[0].concat(folderNames);
+
+    // FOR EACH PAGE (FROM JSON FILE) CHECK IF THERE ARE RELATED JPG FILES
+    pagesArray.forEach(function(page) {
+      var pageFiles = []
+
+      pageFiles.push(page.svg.file);
+
+      viewData.folders.forEach(function(folder) {
+        var filename = (folder.name == 'svg')? page.svg.file : page.svg.file + '.jpg';
+        var fileIndex = _.findIndex(folder.files, function(file) {
+          return file == filename;
+        });
+
+        pageFiles.push(fileIndex >= 0);
+        folder.files.splice(fileIndex, 1);
+      });
+
+
+
+      viewData.files.push(pageFiles);
+    });
+
+    renderView(viewData);
+  },
+  function(err) {
+    console.log('err', err);
+  });
+});
+
+//API STARTS HERE
 
 //READ JSON VERSION
 app.get('/api/pages', function(req, res) {
@@ -206,7 +333,7 @@ app.post('/api/add', function(req, res) {
       PAGE.status = "enable";
       PAGE.svg.dir = 'svg';
 
-  //5 SEND RESPONSE
+  //8 SEND RESPONSE
   function response() {
     var status = {};
         status.status = 'ok';
@@ -215,16 +342,49 @@ app.post('/api/add', function(req, res) {
     res.send(JSON.stringify(status));
   };
 
-  //4 CREATE SMALL JPG FILE (THUMB)
-  function createThumb() {
-    jpgThumbPath = 'public/jpg/w100/' + PAGE.svg.file + '.jpg';
-    new SVGtoJPG(PAGE.svg.path, jpgThumbPath, {width: 100, quality: 90, callback: response});
+  function createJPGs() {
+    var jpgToBeCreated = [];
+    PageFiles.jpgs.folders.forEach(function(folder){
+      jpgToBeCreated.push('public/' + folder + '/' + PAGE.svg.file + '.jpg');
+    });
+
+    new SVGtoJPG(PAGE.svg.path, jpgToBeCreated, {width: PageFiles.jpgs.widths, quality: PageFiles.jpgs.qualities, callback: response})
   };
+
+  // // TODO convert thosde jpg callback to promises (create jpg creation manager object to prevent simultanous jpg creation)
+
+  // //7 CREATE WEB THUMB JPG FILE
+  // function createPdfRes() {
+  //   var jpgPreviewPath = 'public/jpg/w2000/';
+  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
+  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 2000, quality: 55, callback: response});
+  // };
+
+  // //6 CREATE WEB THUMB JPG FILE
+  // function createWebThumb() {
+  //   var jpgPreviewPath = 'public/jpg/w280/';
+  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
+  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 280, quality: 55, callback: createPdfRes});
+  // };
+
+  // //5 CREATE PREVIEW JPG FILE
+  // function createPreview() {
+  //   var jpgPreviewPath = 'public/jpg/w800/';
+  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
+  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 800, quality: 55, callback: createWebThumb});
+  // };
+
+  // //4 CREATE THUMB FILE
+  // function createThumb() {
+  //   var jpgThumbPath = 'public/jpg/w100/';
+  //   var jpgThumbFile = PAGE.svg.file + '.jpg';
+  //   new SVGtoJPG(PAGE.svg.path, jpgThumbPath + jpgThumbFile, {width: 100, quality: 55, callback: createPreview});
+  // };
 
   //3 UPLOAD SVG FILE
   function uploadNewPage (path, file) {
 
-    PAGE.svg.file = utils.encodeFilename(file);
+    PAGE.svg.file = file;
     PAGE.svg.path = path + PAGE.svg.file;
 
     var is = fs.createReadStream(req.files.page.path);
@@ -233,13 +393,15 @@ app.post('/api/add', function(req, res) {
     is.pipe(os);
     os.on('close', function() {
         fs.unlinkSync(req.files.page.path);
-        createThumb();
+        // createThumb();
+        createJPGs();
     });
   };
 
   //2 IF FILE ALREADY EXISTS, WE RENAME THE FILE
   function fileExists (path, file, callback) {
     fs.exists(path + file, function(exists) {
+      console.log(path + file, ' exists? ', exists);
       if (exists) {
         file = file.split('-');
         if (isNaN(file[0])) {
@@ -257,7 +419,7 @@ app.post('/api/add', function(req, res) {
   };
 
   //1 CHECK IF WE TRY TO UPLOAD FILE THAT ALREADY EXISTS
-  fileExists('public/' + PAGE.svg.dir + '/', req.files.page.name, uploadNewPage);
+  fileExists('public/' + PAGE.svg.dir + '/', utils.encodeFilename(req.files.page.name), uploadNewPage);
 
 });
 

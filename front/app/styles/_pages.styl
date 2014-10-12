@@ -15,7 +15,7 @@ ul.pages-list
 
     &.drop-hover
       background-color #ccc
-    
+
     div.spinner
       display block
       position absolute
@@ -25,7 +25,7 @@ ul.pages-list
       left 0px
       background-color rgb(0,0,0)
       background-color rgba(0,0,0,0.3)
-    
+
       .glyphicon
         top 100px
         left 70px
@@ -46,7 +46,7 @@ ul.pages-list
       // width 176px
       // height 249px
       background-color #fff
-      
+
       &.disable
         opacity 0.35
 
@@ -71,7 +71,7 @@ ul.pages-list
       // a.delete:hover
       //   text-decoration none
       //   background-color red
-    
+
     &:hover
       .controls
         display block
@@ -98,3 +98,41 @@ ul.pages-list
 addpage
   input
     width 95px
+
+.catalogPreview
+  position fixed
+  top 0px
+  bottom 0px
+  left 0px
+  right 0px
+  background-color rgba(0,0,0,0.75)
+  user-select none
+  z-index 1200
+
+.catalogPreviewImage
+  display block
+  margin 2.5% auto
+  height 95%
+
+.loader
+  position fixed
+  top 0px
+  bottom 0px
+  left 0px
+  right 0px
+  background-color rgba(255,255,255,0.75)
+  user-select none
+  z-index 1200
+
+.loader-image {
+  display block
+  width 100px
+  height 100%
+  margin 0 auto
+  background url('../img/spinner.gif') no-repeat 50% 50%
+  // position relative
+  // top 50%
+  // transform translateY(-50%)
+}
+
+

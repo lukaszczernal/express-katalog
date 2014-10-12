@@ -11,7 +11,9 @@
     "imagemagick": "^0.1.3",
     "inkscape": "0.0.5",
     "jade": "0.34.1",
+    "lodash": "^2.4.1",
     "pdfkit": "0.2.0",
+    "q": "^1.0.1",
     "request": "~2.40.0",
     "stylus": "0.34.1"
   }

@@ -1,0 +1,22 @@
+!!! 5
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
+    meta(name='viewport', content='width=device-width', initial-scale='1.0')
+    meta(name='description', content='')
+    meta(name='author', content='')
+    //- title(ng-bind-template='{{pageTitle}}')
+    //- link(rel='stylesheet', href='/css/app.css')
+
+    H1 #{title}
+
+    ul
+    each folder in data.folders
+      li #{folder.count} files in #{folder.name}
+
+    table
+      each fileRow in data.files
+        tr
+          each file in fileRow
+            td #{file}
