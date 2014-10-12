@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  body(ng-controller='PagesCtrl', when-scrolled='loadMore()')
+    .wrapper
+      
+      nav.navbar.navbar-default.navbar-fixed-top(role="navigation")
+        
+        .navbar-header
+          a.navbar-brand(href='/')
+            img(src='img/artdom_logo-w200.png', width='200', height='51')
+
+        ul.nav.navbar-nav(ng-include="'/partials/nav.html'")
+      
+
+      .container.main-content
+        div(ng-view)
+      
+
+      //- iframe#printFrame(name="printFrame", src="svg/1-DEKORATORY.svg", width="0", height="0")
+      iframe#printFrame(name="printFrame")

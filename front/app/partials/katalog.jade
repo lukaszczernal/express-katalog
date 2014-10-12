@@ -1,0 +1,39 @@
+
+ul(class='pages-list', ui-sortable="sortPages", ng-model="pages", ng-class="tileSize")
+  li(ng-repeat='page in pages', class="single-page")
+    a.img(class="{{page.status}}")
+      img(src="http://localhost:3000/jpg/w100/{{page.svg.file | encodeFilename}}.jpg", type="image/jpg", width="100", height="141")
+
+    div.controls.btn-group.btn-group-sm(role="toolbar", ng-class="{'btn-group-vertical': tileSize == 'm-smallTiles' }")
+      button.btn.btn-primary(title="Wytnij", data-index="{{$index}}", cut="cutPage({{$index}})")
+        span.glyphicon.glyphicon-transfer
+      //- div.btn-group.btn-group-sm
+      //-   button.btn.btn-primary(data-toggle="dropdown", title="Podmień na nową")
+      //-     span.glyphicon.glyphicon-refresh
+      //-   ul.dropdown-menu
+      //-     li
+      //-       addpage(data-index="{{$index}}")
+      button.btn.btn-primary(disablepage, title="Wyłącz stronę")
+        span.glyphicon.glyphicon-off
+      button.btn.btn-primary(print, title="Drukuj")
+        span.glyphicon.glyphicon-print
+      //- a.btn.btn-primary(href="#", edit, data-index="{{$index}}", title="Edytuj w Inkscape")
+      //-   span.glyphicon.glyphicon-edit
+      button.delete.btn.btn-primary(delete, data-index="{{$index}}", title="Usuń")
+        span.glyphicon.glyphicon-trash
+
+    div.spinner(ng-show="cutting", paste="pastePage({{$index}})")
+      span.glyphicon.glyphicon-hand-left
+
+    div.spinner(ng-show="isPrinting")
+      span.glyphicon.glyphicon-print
+
+    //- div.spinner(ng-show="isCut && cutting", cut)
+    //-   span.glyphicon.glyphicon-transfer
+
+    span.name(data-index="{{$index}}")
+      {{page.svg.file}}
+
+    span.page-number
+      \- {{$index +1 }} \-
+

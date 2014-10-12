@@ -1,0 +1,16 @@
+li(ng-class="getClass('/katalog')")
+  a(href="#", pdf)
+
+li.dropdown
+  a.dropdown-toggle(href="#", data-toggle="dropdown") Dodaj stronę
+    span.caret
+  ul.dropdown-menu
+    li
+      addpage
+
+//- li
+//-   span.btn-group.btn-group-sm
+//-     button.btn.btn-default(title="Małe kafelki", ng-click="changeTileSize('m-smallTiles')", ng-class="{active: tileSize == 'm-smallTiles'}")
+//-       span.glyphicon.glyphicon-th
+//-     button.btn.btn-default(title="Duże kafelki", ng-click="changeTileSize('m-largeTiles')", , ng-class="{active: tileSize == 'm-largeTiles'}")
+//-       span.glyphicon.glyphicon-th-large
