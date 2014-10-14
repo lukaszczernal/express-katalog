@@ -14,6 +14,8 @@ var express   = require('express')
   , utils = require('./lib/utils').utils
   , httpRequest = require('request')
   , FSDeferred = require('./lib/fsdeferred')
+  , FSSync = require('./lib/fssync')
+  , mkdirp = require('mkdirp')
   , PageFiles = require('./lib/pagefiles')
   , Q = require('q')
   , _ = require('lodash');
@@ -203,8 +205,14 @@ app.get('/integrity', function(req, res) {
 //READ JSON VERSION
 app.get('/api/pages', function(req, res) {
   var renderView = function(err, pages) {
-    if (err) console.log('Error. Cannot read JSON file containing pages');
-    var pages = JSON.parse(pages);
+    var pages;
+
+    if (err) {
+      console.log('Error. Cannot read JSON file containing pages');
+      pages = [];
+    } else {
+      pages = JSON.parse(pages);
+    }
     res.send(pages);
 
     // TODO upload files to remote sever
@@ -249,6 +257,8 @@ app.post('/api/save', function(req, res) {
         fs.writeFile('public/data/pages-array.json', jsondata , renderView);
       }
     }
+
+    if (!FSSync.createDirSync('public/data')) renderView('Could not create SVG folder');
 
     fs.writeFile('public/data/tmp.pages-array.json', jsondata , duplicatefile);
 
@@ -333,7 +343,7 @@ app.post('/api/add', function(req, res) {
       PAGE.status = "enable";
       PAGE.svg.dir = 'svg';
 
-  //8 SEND RESPONSE
+  //4 SEND RESPONSE
   function response() {
     var status = {};
         status.status = 'ok';
@@ -342,47 +352,30 @@ app.post('/api/add', function(req, res) {
     res.send(JSON.stringify(status));
   };
 
+  // ERROR RESPONSE
+  function errorResponse(msg) {
+    var status = {};
+        status.status = 'err';
+        status.msg = msg;
+
+    res.send(JSON.stringify(status));
+  }
+
   function createJPGs() {
     var jpgToBeCreated = [];
-    PageFiles.jpgs.folders.forEach(function(folder){
+    PageFiles.jpgs.folders.forEach(function(folder) {
+      mkdirp.sync('public/' + folder);
       jpgToBeCreated.push('public/' + folder + '/' + PAGE.svg.file + '.jpg');
     });
 
     new SVGtoJPG(PAGE.svg.path, jpgToBeCreated, {width: PageFiles.jpgs.widths, quality: PageFiles.jpgs.qualities, callback: response})
   };
 
-  // // TODO convert thosde jpg callback to promises (create jpg creation manager object to prevent simultanous jpg creation)
-
-  // //7 CREATE WEB THUMB JPG FILE
-  // function createPdfRes() {
-  //   var jpgPreviewPath = 'public/jpg/w2000/';
-  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 2000, quality: 55, callback: response});
-  // };
-
-  // //6 CREATE WEB THUMB JPG FILE
-  // function createWebThumb() {
-  //   var jpgPreviewPath = 'public/jpg/w280/';
-  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 280, quality: 55, callback: createPdfRes});
-  // };
-
-  // //5 CREATE PREVIEW JPG FILE
-  // function createPreview() {
-  //   var jpgPreviewPath = 'public/jpg/w800/';
-  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 800, quality: 55, callback: createWebThumb});
-  // };
-
-  // //4 CREATE THUMB FILE
-  // function createThumb() {
-  //   var jpgThumbPath = 'public/jpg/w100/';
-  //   var jpgThumbFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgThumbPath + jpgThumbFile, {width: 100, quality: 55, callback: createPreview});
-  // };
-
   //3 UPLOAD SVG FILE
   function uploadNewPage (path, file) {
+    if (!FSSync.createDirSync('public/svg')) {
+      errorResponse('Could not create SVG folder');
+    }
 
     PAGE.svg.file = file;
     PAGE.svg.path = path + PAGE.svg.file;
@@ -393,7 +386,6 @@ app.post('/api/add', function(req, res) {
     is.pipe(os);
     os.on('close', function() {
         fs.unlinkSync(req.files.page.path);
-        // createThumb();
         createJPGs();
     });
   };
