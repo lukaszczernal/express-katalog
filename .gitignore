@@ -1,5 +1,9 @@
-bower_components
-**/node_modules
-public
-.tmp
-**/.DS_Store
+.git
+.dropbox
+daemon
+front
+node_modules
+public/jpg
+public/pdf
+public/svg
+

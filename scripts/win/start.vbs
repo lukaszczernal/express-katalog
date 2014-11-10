@@ -1,0 +1,1 @@
+CreateObject("WScript.Shell").RegWrite "HKLM\SYSTEM\CurrentControlSet\Services\Katalog\Parameters\AppDirectory", "C:\Documents and Settings\OPTIMUS\Moje dokumenty\Dropbox\express-katalog\", "REG_EXPAND_SZ"
