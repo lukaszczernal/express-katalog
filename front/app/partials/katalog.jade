@@ -21,6 +21,8 @@ ul(class='pages-list', ui-sortable="sortPages", ng-model="pages", ng-class="tile
         span.glyphicon.glyphicon-print
       //- a.btn.btn-primary(href="#", edit, data-index="{{$index}}", title="Edytuj w Inkscape")
       //-   span.glyphicon.glyphicon-edit
+      a.btn.btn-primary(data-index="{{$index}}", title="Zapisz jako", ng-href="http://localhost:3000/jpg/w800/{{page.svg.file | encodeFilename}}.jpg", download)
+        span.glyphicon.glyphicon-download
       button.delete.btn.btn-primary(delete, data-index="{{$index}}", title="Usuń")
         span.glyphicon.glyphicon-trash
 

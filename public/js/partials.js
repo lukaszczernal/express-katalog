@@ -16,7 +16,7 @@ angular.module('partials', [])
 '        </ul>',
 '      </div>',
 '      <button disablepage title="Wyłącz stronę" class="btn btn-primary"><span class="glyphicon glyphicon-off"></span></button>',
-'      <button print title="Drukuj" class="btn btn-primary"><span class="glyphicon glyphicon-print"></span></button>',
+'      <button print title="Drukuj" class="btn btn-primary"><span class="glyphicon glyphicon-print"></span></button><a data-index="{{$index}}" title="Zapisz jako" ng-href="http://localhost:3000/jpg/w800/{{page.svg.file | encodeFilename}}.jpg" download class="btn btn-primary"><span class="glyphicon glyphicon-download"></span></a>',
 '      <button delete data-index="{{$index}}" title="Usuń" class="delete btn btn-primary"><span class="glyphicon glyphicon-trash"></span></button>',
 '    </div>',
 '    <div ng-show="cutting" paste="pastePage({{$index}})" class="spinner"><span class="glyphicon glyphicon-hand-left"></span></div>',
