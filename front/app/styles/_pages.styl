@@ -1,98 +1,117 @@
 
-ul.pages-list
+@keyframes rotate {
+  from {
+    transform: rotate(0deg)
+  }
 
-  li.single-page
-    display inline-block
-    position relative
-    padding 10px
-    padding-bottom 10px
-    background-color #f2f2f2
-    margin-right 20px
-    margin-bottom 20px
-    border-radius 4px
-    vertical-align top
-    font-size 14px
+  to {
+    transform: rotate(360deg)
+  }
+}
 
-    &.drop-hover
-      background-color #ccc
+.page
+  display inline-block
+  position relative
+  padding 10px
+  padding-bottom 10px
+  background-color #f2f2f2
+  margin-right 20px
+  margin-bottom 20px
+  border-radius 4px
+  vertical-align top
+  font-size 14px
 
-    div.spinner
-      display block
-      position absolute
-      top 0px
-      right 0px
-      bottom 0px
-      left 0px
-      background-color rgb(0,0,0)
-      background-color rgba(0,0,0,0.3)
+  &.drop-hover
+    background-color #ccc
 
-      .glyphicon
-        top 100px
-        left 70px
-        font-size 60px
-        color #fff
+  .spinner
+    display block
+    position absolute
+    top 0px
+    right 0px
+    bottom 0px
+    left 0px
+    background-color rgb(0,0,0)
+    background-color rgba(0,0,0,0.3)
+    cursor pointer
 
-
-    span.name
-      display block
-      width 170px
-      line-height 2em
-      overflow hidden
-      text-overflow ellipsis
-      white-space nowrap
-
-    a.img
-      display block
-      // width 176px
-      // height 249px
-      background-color #fff
-
-      &.disable
-        opacity 0.35
-
-      img
-        width 176px
-
-    span.page-number
-      display block
-      text-align center
-      font-size 0.8em
-
-    .controls
-      display none
-      position absolute
-      top 0px
-      right 0px
+    .glyphicon
+      top 100px
+      left 70px
+      font-size 60px
       color #fff
-      text-align center
 
+      &.glyphicon-refresh.m-refreshing
+        -webkit-animation rotate 1s infinite
+        -webkit-animation-timing-function linear
 
+  .spinner-label
+    display block
+    color #fff
+    text-align center
+    font-size 1.3em
 
-      // a.delete:hover
-      //   text-decoration none
-      //   background-color red
+  span.name
+    display block
+    width 170px
+    line-height 2em
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
 
-    &:hover
-      .controls
-        display block
+  .page-image
+    display block
+    background-color #fff
 
+    &.disable
+      opacity 0.35
+
+    img
+      width 176px
+
+  span.page-number
+    display block
+    text-align center
+    font-size 0.8em
+
+  .controls
+    display none
+    position absolute
+    top 0px
+    right 0px
+    color #fff
+    text-align center
+    z-index 100
+
+    // a.delete:hover
+    //   text-decoration none
+    //   background-color red
+
+  &:hover
+    .controls
+      display block
+
+.pages-list
   &.m-smallTiles
-    li.single-page
+    li.page
       font-size 10px
       margin-bottom 10px
       margin-right 10px
       padding-bottom 5px
-      a.img
+
+      .page-image
         img
           width 100px
       span.name
         width 100px
 
-      div.spinner
+      .spinner
         .glyphicon
-          top 70px
-          left 40px
+          top 75px
+          left 45px
           font-size 40px
+          &.glyphicon-refresh
+            font-size 30px
 
 
 addpage

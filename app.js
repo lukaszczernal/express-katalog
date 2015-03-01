@@ -35,7 +35,8 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 // all environments
-app.set('env', 'production')
+_env = (!!process.argv[2])? 'development' : 'production'
+app.set('env', _env)
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
@@ -326,6 +327,35 @@ app.get('/api/edit/:id', function(req, res) {
   fs.readFile('public/data/pages-array.json', editFile);
 });
 
+app.get('/api/refresh/:id', function(req, res){
+  var index = req.params.id;
+  console.log('refresh: ' + index);
+
+  function response() {
+    var status = {};
+        status.status = 'ok';
+    res.send(JSON.stringify(status));
+  };
+
+  var refresh = function(err, pages) {
+    if (err) console.log('Error. Cannot edit page related files');
+    var pages = JSON.parse(pages);
+    PAGE = pages[index];
+
+    var svg = 'public/svg/' + PAGE.svg.file;
+
+    var jpgToBeCreated = [];
+    PageFiles.jpgs.folders.forEach(function(folder){
+      jpgToBeCreated.push('public/' + folder + '/' + PAGE.svg.file + '.jpg');
+    });
+
+    new SVGtoJPG(PAGE.svg.path, jpgToBeCreated, {width: PageFiles.jpgs.widths, quality: PageFiles.jpgs.qualities, callback: response});
+  };
+
+  fs.readFile('public/data/pages-array.json', refresh);
+
+});
+
 app.post('/api/add', function(req, res) {
 
   var PAGE = {};
@@ -351,36 +381,6 @@ app.post('/api/add', function(req, res) {
     new SVGtoJPG(PAGE.svg.path, jpgToBeCreated, {width: PageFiles.jpgs.widths, quality: PageFiles.jpgs.qualities, callback: response})
   };
 
-  // // TODO convert thosde jpg callback to promises (create jpg creation manager object to prevent simultanous jpg creation)
-
-  // //7 CREATE WEB THUMB JPG FILE
-  // function createPdfRes() {
-  //   var jpgPreviewPath = 'public/jpg/w2000/';
-  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 2000, quality: 55, callback: response});
-  // };
-
-  // //6 CREATE WEB THUMB JPG FILE
-  // function createWebThumb() {
-  //   var jpgPreviewPath = 'public/jpg/w280/';
-  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 280, quality: 55, callback: createPdfRes});
-  // };
-
-  // //5 CREATE PREVIEW JPG FILE
-  // function createPreview() {
-  //   var jpgPreviewPath = 'public/jpg/w800/';
-  //   var jpgPreviewFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgPreviewPath + jpgPreviewFile, {width: 800, quality: 55, callback: createWebThumb});
-  // };
-
-  // //4 CREATE THUMB FILE
-  // function createThumb() {
-  //   var jpgThumbPath = 'public/jpg/w100/';
-  //   var jpgThumbFile = PAGE.svg.file + '.jpg';
-  //   new SVGtoJPG(PAGE.svg.path, jpgThumbPath + jpgThumbFile, {width: 100, quality: 55, callback: createPreview});
-  // };
-
   //3 UPLOAD SVG FILE
   function uploadNewPage (path, file) {
 
@@ -393,7 +393,6 @@ app.post('/api/add', function(req, res) {
     is.pipe(os);
     os.on('close', function() {
         fs.unlinkSync(req.files.page.path);
-        // createThumb();
         createJPGs();
     });
   };

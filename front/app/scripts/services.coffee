@@ -34,6 +34,10 @@ angular.module('app.services', [])
     console.log 'edit page number ' + (index + 1)
     $http.get('http://localhost:3000/api/edit/' + index)
 
+  @refresh = (index) ->
+    console.log 'refreshing page number ' + (index + 1)
+    $http.get('http://localhost:3000/api/refresh/' + index)
+
   # @add = (file) ->
   #   console.log 'service - adding file'
   #   $http.post('http://localhost:3000/api/add')

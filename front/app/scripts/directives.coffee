@@ -113,13 +113,13 @@ angular.module('app.directives', [
 				scope.delete index
 			false
 
-.directive 'edit', () ->
-	(scope, element, attrs) ->
-		$(element).click (e) ->
-			e.preventDefault()
-			index = attrs.index
-			scope.edit index
-			false
+# .directive 'edit', () ->
+# 	(scope, element, attrs) ->
+# 		$(element).click (e) ->
+# 			e.preventDefault()
+# 			index = attrs.index
+# 			scope.edit index
+# 			false
 
 # .directive 'cut', () ->
 # 	(scope, element, attrs) ->

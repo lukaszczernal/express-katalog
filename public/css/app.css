@@ -7154,7 +7154,7 @@ ul.navbar-nav .logo {
 ul.navbar-nav .nav {
   display: inline-block;
 }
-ul.pages-list li.single-page {
+.page {
   display: inline-block;
   position: relative;
   padding: 10px;
@@ -7166,10 +7166,10 @@ ul.pages-list li.single-page {
   vertical-align: top;
   font-size: 14px;
 }
-ul.pages-list li.single-page.drop-hover {
+.page.drop-hover {
   background-color: #ccc;
 }
-ul.pages-list li.single-page div.spinner {
+.page .spinner {
   display: block;
   position: absolute;
   top: 0px;
@@ -7178,14 +7178,25 @@ ul.pages-list li.single-page div.spinner {
   left: 0px;
   background-color: #000;
   background-color: rgba(0,0,0,0.3);
+  cursor: pointer;
 }
-ul.pages-list li.single-page div.spinner .glyphicon {
+.page .spinner .glyphicon {
   top: 100px;
   left: 70px;
   font-size: 60px;
   color: #fff;
 }
-ul.pages-list li.single-page span.name {
+.page .spinner .glyphicon.glyphicon-refresh.m-refreshing {
+  -webkit-animation: rotate 1s infinite;
+  -webkit-animation-timing-function: linear;
+}
+.page .spinner-label {
+  display: block;
+  color: #fff;
+  text-align: center;
+  font-size: 1.3em;
+}
+.page span.name {
   display: block;
   width: 170px;
   line-height: 2em;
@@ -7193,48 +7204,52 @@ ul.pages-list li.single-page span.name {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-ul.pages-list li.single-page a.img {
+.page .page-image {
   display: block;
   background-color: #fff;
 }
-ul.pages-list li.single-page a.img.disable {
+.page .page-image.disable {
   opacity: 0.35;
 }
-ul.pages-list li.single-page a.img img {
+.page .page-image img {
   width: 176px;
 }
-ul.pages-list li.single-page span.page-number {
+.page span.page-number {
   display: block;
   text-align: center;
   font-size: 0.8em;
 }
-ul.pages-list li.single-page .controls {
+.page .controls {
   display: none;
   position: absolute;
   top: 0px;
   right: 0px;
   color: #fff;
   text-align: center;
+  z-index: 100;
 }
-ul.pages-list li.single-page:hover .controls {
+.page:hover .controls {
   display: block;
 }
-ul.pages-list.m-smallTiles li.single-page {
+.pages-list.m-smallTiles li.page {
   font-size: 10px;
   margin-bottom: 10px;
   margin-right: 10px;
   padding-bottom: 5px;
 }
-ul.pages-list.m-smallTiles li.single-page a.img img {
+.pages-list.m-smallTiles li.page .page-image img {
   width: 100px;
 }
-ul.pages-list.m-smallTiles li.single-page span.name {
+.pages-list.m-smallTiles li.page span.name {
   width: 100px;
 }
-ul.pages-list.m-smallTiles li.single-page div.spinner .glyphicon {
-  top: 70px;
-  left: 40px;
+.pages-list.m-smallTiles li.page .spinner .glyphicon {
+  top: 75px;
+  left: 45px;
   font-size: 40px;
+}
+.pages-list.m-smallTiles li.page .spinner .glyphicon.glyphicon-refresh {
+  font-size: 30px;
 }
 addpage input {
   width: 95px;
@@ -7270,6 +7285,38 @@ addpage input {
   height: 100%;
   margin: 0 auto;
   background: url("../img/spinner.gif") no-repeat 50% 50%;
+}
+@-moz-keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .newPage {
   position: relative;

@@ -70,7 +70,7 @@ angular.module('app.controllers', ['ui.sortable'])
     $scope.tileSize = size
     false
 
-  $scope.loadpages = ->
+  loadpages = ->
     pagesSrv.load()
     .success (response) ->
       $scope.pages = response
@@ -104,7 +104,18 @@ angular.module('app.controllers', ['ui.sortable'])
       $scope.hideLoader()
 
   $scope.edit = (index) ->
+    $scope.pages[index].needsRefresh = true
+    $scope.save()
     pagesSrv.edit(index)
+
+  $scope.refresh = (index) ->
+    $scope.pages[index].refreshing = true
+    pagesSrv.refresh(index).then ->
+      delete $scope.pages[index].needsRefresh
+      delete $scope.pages[index].refreshing
+      $scope.pages[index].nocache = '?' + new Date().getTime()
+      $scope.save()
+
 
   $scope.pdf = (pages) ->
     pagesSrv.pdf(pages)
@@ -131,7 +142,7 @@ angular.module('app.controllers', ['ui.sortable'])
   $scope.hideLoader = () ->
     $scope.isLoading = false
 
-  $scope.loadpages()
+  loadpages()
 )
 
 

@@ -31,6 +31,7 @@ angular.module('app.controllers', ['ui.sortable']).controller('AppCtrl', [
     };
   }
 ]).controller('PagesCtrl', function($scope, $q, pagesSrv, $filter) {
+  var loadpages;
   $scope.pages = [];
   $scope.tileSize = 'm-smallTiles';
   $scope.cutting = false;
@@ -61,7 +62,7 @@ angular.module('app.controllers', ['ui.sortable']).controller('AppCtrl', [
     $scope.tileSize = size;
     return false;
   };
-  $scope.loadpages = function() {
+  loadpages = function() {
     return pagesSrv.load().success(function(response) {
       return $scope.pages = response;
     }).error(function(status, error) {
@@ -95,7 +96,18 @@ angular.module('app.controllers', ['ui.sortable']).controller('AppCtrl', [
     });
   };
   $scope.edit = function(index) {
+    $scope.pages[index].needsRefresh = true;
+    $scope.save();
     return pagesSrv.edit(index);
+  };
+  $scope.refresh = function(index) {
+    $scope.pages[index].refreshing = true;
+    return pagesSrv.refresh(index).then(function() {
+      delete $scope.pages[index].needsRefresh;
+      delete $scope.pages[index].refreshing;
+      $scope.pages[index].nocache = '?' + new Date().getTime();
+      return $scope.save();
+    });
   };
   $scope.pdf = function(pages) {
     return pagesSrv.pdf(pages).success(function(response) {
@@ -124,7 +136,7 @@ angular.module('app.controllers', ['ui.sortable']).controller('AppCtrl', [
   $scope.hideLoader = function() {
     return $scope.isLoading = false;
   };
-  return $scope.loadpages();
+  return loadpages();
 });
 ;'use strict';
 /* Directives*/
@@ -243,16 +255,6 @@ angular.module('app.directives', ['app.services']).directive('tooltip', function
       return false;
     });
   };
-}).directive('edit', function() {
-  return function(scope, element, attrs) {
-    return $(element).click(function(e) {
-      var index;
-      e.preventDefault();
-      index = attrs.index;
-      scope.edit(index);
-      return false;
-    });
-  };
 }).directive('paste', function() {
   return function(scope, element, attrs) {
     return $(element).click(function(e) {
@@ -354,6 +356,10 @@ angular.module('app.services', []).factory('version', function() {
   this.edit = function(index) {
     console.log('edit page number ' + (index + 1));
     return $http.get('http://localhost:3000/api/edit/' + index);
+  };
+  this.refresh = function(index) {
+    console.log('refreshing page number ' + (index + 1));
+    return $http.get('http://localhost:3000/api/refresh/' + index);
   };
   return this.upload = function(form) {
     var def;

@@ -1,3 +1,1 @@
-C:
-cd C:\Documents and Settings\OPTIMUS\Moje dokumenty\Dropbox\express-katalog-test
-node app
+start cmd /k .\start-scripts-hurtownia\test-hurtownia.bat
