@@ -6,5 +6,5 @@ front
 node_modules
 public/jpg
 public/pdf
-public/svg
+#public/svg
 
