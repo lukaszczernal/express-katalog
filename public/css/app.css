@@ -7318,21 +7318,6 @@ addpage input {
     transform: rotate(360deg);
   }
 }
-.newPage {
-  position: relative;
-  overflow: hidden;
-  margin: 10px;
-}
-.newPage-input {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 0;
-  padding: 0;
-  font-size: 20px;
-  cursor: pointer;
-  opacity: 0;
-}
 
 
 /*# sourceMappingURL=app.css.map*/

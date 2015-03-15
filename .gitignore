@@ -2,7 +2,7 @@
 .git
 .dropbox
 daemon
-front
+#front
 node_modules
 public/jpg
 public/pdf
