@@ -17,6 +17,7 @@ angular.module('app.services', [])
 
 .service 'pagesSrv', ($rootScope, $http, $q) ->
   @save = (json) ->
+    if not json then return $q.reject('No data to store.');
     $http.post('http://localhost:3000/api/save', {jsondata: JSON.stringify(json)})
 
   @load = ->

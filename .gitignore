@@ -1,10 +1,11 @@
 .DS_Store
 .git
 .dropbox
+npm-debug.log
 daemon
 #front
 node_modules
 public/jpg
 public/pdf
 #public/svg
-
+public

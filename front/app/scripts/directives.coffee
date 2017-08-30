@@ -51,28 +51,32 @@ angular.module('app.directives', [
 
 .directive('addpage', () ->
 	restrict: 'E'
-	template: '<form enctype="multipart/form-data"><input name="page" type="file" class="addpage"></form>'
-	link: (scope, element, attrs) ->
+	template: '
+		<form name="addPageForm" enctype="multipart/form-data" novalidate>
+			<input required ng-model="pageFile" name="page" type="file" class="addpage">
+		</form>
+	'
+	link: (scope, element, attrs, formCtrl) ->
 		form = element.find('form')
 		input = form.find('input[type="file"]')
+		isNew = not attrs.index?
 
 		input.bind 'change', ->
-			scope.showLoader()
-			form.submit()
+			if input.val()
+				scope.showLoader()
+				form.submit()
 
 		form.bind 'submit', (e) ->
 			e.preventDefault()
 
-			if attrs.index?		# REPLACING SELECTED PAGE WITH NEW VERSION
-				upload(@)
-				.done (res) ->
-					page = res.data
-					replace attrs.index, page
-			else
-				upload(@)
-				.done (res) ->
+			upload(@)
+			.done (res) ->
+				if isNew
 					scope.pages.push res.data
 					scope.save()
+				else
+					page = res.data
+					replace attrs.index, page
 
 		replace = (index, page) ->
 			scope.deletePageFiles(index)
@@ -93,7 +97,6 @@ angular.module('app.directives', [
 					def.reject res
 
 			.fail (failResp) ->
-				console.log('directive upload fail');
 				onUploadPageFail failResp
 				def.reject failResp
 

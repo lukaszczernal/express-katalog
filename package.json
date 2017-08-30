@@ -1,5 +1,5 @@
 {
-  "name": "application-name",
+  "name": "express-katalog",
   "version": "1.0.0",
   "private": true,
   "scripts": {

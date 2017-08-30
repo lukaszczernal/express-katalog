@@ -16,7 +16,8 @@ var express   = require('express')
   , FSDeferred = require('./lib/fsdeferred')
   , PageFiles = require('./lib/pagefiles')
   , Q = require('q')
-  , _ = require('lodash');
+  , _ = require('lodash')
+  , Response = require('./lib/response').Response;
 
 var app = express();
 var issaving = false;
@@ -92,7 +93,7 @@ app.get('/update-json-file', function(req, res) {
     });
     setTimeout(function() {
       var pagesData = JSON.stringify(pages);
-      var duplicatefile = function(err) {
+      var duplicateFile = function(err) {
         if (err) {
           var status = JSON.stringify({status: 'err', message: 'Error 2. Cannot read JSON file containing pages'});
           res.send(status);
@@ -103,7 +104,7 @@ app.get('/update-json-file', function(req, res) {
         }
       }
 
-      fs.writeFile('public/data/tmp.pages-array.json', pagesData , duplicatefile);
+      fs.writeFile('public/data/tmp.pages-array.json', pagesData , duplicateFile);
     }, 4000);
 
   });
@@ -232,29 +233,40 @@ app.get('/api/pages', function(req, res) {
 app.post('/api/save', function(req, res) {
   var jsondata = req.body.jsondata;
 
-  if (issaving == false) {
+  if (!issaving) {
     issaving = true;
 
     var renderView = function(err) {
       var status = JSON.stringify({status: 'ok'});
-      if (err) status = JSON.stringify({status: 'err', message: 'Error 1. Cannot read JSON file containing pages'});
-      res.send(status);
+      if (err) status = Response.error('Error 1. Cannot read JSON file containing pages');
+
       issaving = false;
+      res.send(status);
     };
 
-    var duplicatefile = function(err) {
+    var duplicateFile = function(err) {
       if (err) {
-        var status = JSON.stringify({status: 'err', message: 'Error 2. Cannot read JSON file containing pages'});
+        var status = Response.error('Error 2. Cannot read JSON file containing pages');
         res.send(status);
       } else {
-        fs.writeFile('public/data/pages-array.json', jsondata , renderView);
+        if (jsondata) {
+          fs.writeFile('public/data/pages-array.json', jsondata, renderView);
+        } else {
+          var status = Response.error('pages-array.json file save fail.');
+          res.send(status);
+        }
       }
     }
 
-    fs.writeFile('public/data/tmp.pages-array.json', jsondata , duplicatefile);
+    if (jsondata) {
+      fs.writeFile('public/data/tmp.pages-array.json', jsondata, duplicateFile);
+    } else {
+      var status = Response.error('tmp.pages-array.json file save fail.');
+      res.send(status);
+    }
 
   } else {
-    var status = JSON.stringify({status: 'err', message: 'Another saving process is in progress.'});
+    var status = Response.error('Another saving process is in progress.');
     res.send(status);
   }
 
@@ -316,7 +328,22 @@ app.get('/api/edit/:id', function(req, res) {
     fs.exists(svg, function(exists) {
       if (exists) {
         res.send(JSON.stringify({'status': 'ok', 'svg': svg}));
-        spawn('inkscape', [svg]);
+        var childProcess = spawn('inkscape', ['-f', svg]);
+
+        childProcess.on('error', function(err) {
+          console.error('Inkscape error: ', err);
+        });
+
+        childProcess.on('exit', function(code, signal) {
+          if (code) {
+            console.error('Inkscape exited with code', code)
+          } else if (signal) {
+            console.error('Inkscape  was killed with signal', signal);
+          } else {
+            console.log('Inkscape exited okay');
+          }
+
+        });
       } else {
         res.send(JSON.stringify({'status': 'err', 'svg': svg}));
       };
@@ -365,11 +392,8 @@ app.post('/api/add', function(req, res) {
 
   //8 SEND RESPONSE
   function response() {
-    var status = {};
-        status.status = 'ok';
-        status.data = PAGE;
-
-    res.send(JSON.stringify(status));
+    var status = Response.success('Page added successfully.', {data: PAGE});
+    res.send(status);
   };
 
   function createJPGs() {
@@ -418,7 +442,13 @@ app.post('/api/add', function(req, res) {
   };
 
   //1 CHECK IF WE TRY TO UPLOAD FILE THAT ALREADY EXISTS
-  fileExists('public/' + PAGE.svg.dir + '/', utils.encodeFilename(req.files.page.name), uploadNewPage);
+  if (req.files.page) {
+    fileExists('public/' + PAGE.svg.dir + '/', utils.encodeFilename(req.files.page.name), uploadNewPage);
+  } else {
+    res
+      .status(400)
+      .send(Response.error('Error. Page not added.'));
+  }
 
 });
 

@@ -104,11 +104,13 @@ angular.module('app.controllers', ['ui.sortable'])
       $scope.hideLoader()
 
   $scope.edit = (index) ->
+    if isNaN(index) then return false;
     $scope.pages[index].needsRefresh = true
     $scope.save()
     pagesSrv.edit(index)
 
   $scope.refresh = (index) ->
+    if isNaN(index) then return false;
     $scope.pages[index].refreshing = true
     pagesSrv.refresh(index).then ->
       delete $scope.pages[index].needsRefresh
@@ -140,7 +142,8 @@ angular.module('app.controllers', ['ui.sortable'])
       $scope.isLoading = true
 
   $scope.hideLoader = () ->
-    $scope.isLoading = false
+    $scope.$apply () =>
+      $scope.isLoading = false
 
   loadpages()
 )
