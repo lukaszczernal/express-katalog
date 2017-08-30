@@ -96,11 +96,17 @@ angular.module('app.controllers', ['ui.sortable']).controller('AppCtrl', [
     });
   };
   $scope.edit = function(index) {
+    if (isNaN(index)) {
+      return false;
+    }
     $scope.pages[index].needsRefresh = true;
     $scope.save();
     return pagesSrv.edit(index);
   };
   $scope.refresh = function(index) {
+    if (isNaN(index)) {
+      return false;
+    }
     $scope.pages[index].refreshing = true;
     return pagesSrv.refresh(index).then(function() {
       delete $scope.pages[index].needsRefresh;
@@ -134,7 +140,10 @@ angular.module('app.controllers', ['ui.sortable']).controller('AppCtrl', [
     });
   };
   $scope.hideLoader = function() {
-    return $scope.isLoading = false;
+    var _this = this;
+    return $scope.$apply(function() {
+      return $scope.isLoading = false;
+    });
   };
   return loadpages();
 });
@@ -190,29 +199,34 @@ angular.module('app.directives', ['app.services']).directive('tooltip', function
 }).directive('addpage', function() {
   return {
     restrict: 'E',
-    template: '<form enctype="multipart/form-data"><input name="page" type="file" class="addpage"></form>',
-    link: function(scope, element, attrs) {
-      var form, input, onUploadPageFail, replace, upload;
+    template: '\
+		<form name="addPageForm" enctype="multipart/form-data" novalidate>\
+			<input required ng-model="pageFile" name="page" type="file" class="addpage">\
+		</form>\
+	',
+    link: function(scope, element, attrs, formCtrl) {
+      var form, input, isNew, onUploadPageFail, replace, upload;
       form = element.find('form');
       input = form.find('input[type="file"]');
+      isNew = attrs.index == null;
       input.bind('change', function() {
-        scope.showLoader();
-        return form.submit();
+        if (input.val()) {
+          scope.showLoader();
+          return form.submit();
+        }
       });
       form.bind('submit', function(e) {
         e.preventDefault();
-        if (attrs.index != null) {
-          return upload(this).done(function(res) {
-            var page;
-            page = res.data;
-            return replace(attrs.index, page);
-          });
-        } else {
-          return upload(this).done(function(res) {
+        return upload(this).done(function(res) {
+          var page;
+          if (isNew) {
             scope.pages.push(res.data);
             return scope.save();
-          });
-        }
+          } else {
+            page = res.data;
+            return replace(attrs.index, page);
+          }
+        });
       });
       replace = function(index, page) {
         return scope.deletePageFiles(index).success(function(res) {
@@ -232,7 +246,6 @@ angular.module('app.directives', ['app.services']).directive('tooltip', function
             return def.reject(res);
           }
         }).fail(function(failResp) {
-          console.log('directive upload fail');
           onUploadPageFail(failResp);
           return def.reject(failResp);
         });
@@ -336,6 +349,9 @@ angular.module('app.services', []).factory('version', function() {
   return "0.2";
 }).service('pagesSrv', function($rootScope, $http, $q) {
   this.save = function(json) {
+    if (!json) {
+      return $q.reject('No data to store.');
+    }
     return $http.post('http://localhost:3000/api/save', {
       jsondata: JSON.stringify(json)
     });

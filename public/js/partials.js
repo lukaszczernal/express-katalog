@@ -1,5 +1,17 @@
 angular.module('partials', [])
 .run(['$templateCache', function($templateCache) {
+  return $templateCache.put('/partials/nav.html', [
+'',
+'<li ng-class="getClass(\'/katalog\')"><a href="#" pdf></a></li>',
+'<li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Dodaj stronę<span class="caret"></span></a>',
+'  <ul class="dropdown-menu">',
+'    <li>',
+'      <addpage></addpage>',
+'    </li>',
+'  </ul>',
+'</li>',''].join("\n"));
+}])
+.run(['$templateCache', function($templateCache) {
   return $templateCache.put('/partials/katalog.html', [
 '',
 '<ul ui-sortable="sortPages" ng-model="pages" ng-class="tileSize" class="pages-list">',
@@ -23,16 +35,4 @@ angular.module('partials', [])
 '    </div><span data-index="{{$index}}" class="name">{{page.svg.file}}</span><span class="page-number">\- {{$index +1 }} \-</span>',
 '  </li>',
 '</ul>',''].join("\n"));
-}])
-.run(['$templateCache', function($templateCache) {
-  return $templateCache.put('/partials/nav.html', [
-'',
-'<li ng-class="getClass(\'/katalog\')"><a href="#" pdf></a></li>',
-'<li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Dodaj stronę<span class="caret"></span></a>',
-'  <ul class="dropdown-menu">',
-'    <li>',
-'      <addpage></addpage>',
-'    </li>',
-'  </ul>',
-'</li>',''].join("\n"));
 }]);
