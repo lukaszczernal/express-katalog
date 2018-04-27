@@ -338,7 +338,7 @@ app.get('/api/edit/:id', function(req, res) {
           if (code) {
             console.error('Inkscape exited with code', code)
           } else if (signal) {
-            console.error('Inkscape  was killed with signal', signal);
+            console.error('Inkscape was killed with signal', signal);
           } else {
             console.log('Inkscape exited okay');
           }
