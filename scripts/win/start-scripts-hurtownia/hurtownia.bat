@@ -1,3 +1,6 @@
+set arg1=%1
+start chrome "http://localhost:3000"
+
 C:
-cd C:\Documents and Settings\Marek_\Moje dokumenty\Dropbox\express-katalog
+cd C:\Users\%arg1%\Dropbox\express-katalog 
 node app
