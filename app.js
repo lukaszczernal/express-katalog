@@ -226,7 +226,7 @@ app.get('/api/pages', function(req, res) {
   };
 
 
-  fs.readFile('public/data/pages-array.json', renderView);
+  fs.readFileSync('public/data/pages-array.json', renderView);
 });
 
 //SAVE JSON TO FILE
@@ -311,7 +311,7 @@ app.get('/api/delete/:id', function(req, res) {
 
   };
 
-  fs.readFile('public/data/pages-array.json', deleteFiles);
+  fs.readFileSync('public/data/pages-array.json', deleteFiles);
 });
 
 app.get('/api/edit/:id', function(req, res) {
@@ -321,9 +321,13 @@ app.get('/api/edit/:id', function(req, res) {
   var editFile = function(err, pages) {
     if (err) console.log('Error. Cannot edit page related files');
     var pages = JSON.parse(pages);
-    PAGE = pages[index];
-
-    var svg = 'public/svg/' + PAGE.svg.file;
+    PAGE = pages && pages[index];
+    var svg;
+    if (PAGE && PAGE.svg) {
+      svg = 'public/svg/' + PAGE.svg.file;
+    } else {
+      console.log('SVG file path invalid', svg, PAGE);
+    }
 
     fs.exists(svg, function(exists) {
       if (exists) {
@@ -351,7 +355,7 @@ app.get('/api/edit/:id', function(req, res) {
 
   };
 
-  fs.readFile('public/data/pages-array.json', editFile);
+  fs.readFileSync('public/data/pages-array.json', editFile);
 });
 
 app.get('/api/refresh/:id', function(req, res){
@@ -379,7 +383,7 @@ app.get('/api/refresh/:id', function(req, res){
     new SVGtoJPG(PAGE.svg.path, jpgToBeCreated, {width: PageFiles.jpgs.widths, quality: PageFiles.jpgs.qualities, callback: response});
   };
 
-  fs.readFile('public/data/pages-array.json', refresh);
+  fs.readFileSync('public/data/pages-array.json', refresh);
 
 });
 
