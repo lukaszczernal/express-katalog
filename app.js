@@ -225,8 +225,8 @@ app.get('/api/pages', function(req, res) {
 
   };
 
-
-  fs.readFileSync('public/data/pages-array.json', renderView);
+  const pages = fs.readFileSync('public/data/pages-array.json');
+  renderView(undefined, pages); // TODO error handler
 });
 
 //SAVE JSON TO FILE
@@ -311,7 +311,8 @@ app.get('/api/delete/:id', function(req, res) {
 
   };
 
-  fs.readFileSync('public/data/pages-array.json', deleteFiles);
+  const pages = fs.readFileSync('public/data/pages-array.json');
+  deleteFiles(undefined, pages); // TODO error handler
 });
 
 app.get('/api/edit/:id', function(req, res) {
@@ -355,7 +356,8 @@ app.get('/api/edit/:id', function(req, res) {
 
   };
 
-  fs.readFileSync('public/data/pages-array.json', editFile);
+  const pages = fs.readFileSync('public/data/pages-array.json');
+  editFile(undefined, pages); // TODO error handler
 });
 
 app.get('/api/refresh/:id', function(req, res){
@@ -383,8 +385,8 @@ app.get('/api/refresh/:id', function(req, res){
     new SVGtoJPG(PAGE.svg.path, jpgToBeCreated, {width: PageFiles.jpgs.widths, quality: PageFiles.jpgs.qualities, callback: response});
   };
 
-  fs.readFileSync('public/data/pages-array.json', refresh);
-
+  const pages = fs.readFileSync('public/data/pages-array.json');
+  refresh(undefined, pages); // TODO error handler
 });
 
 app.post('/api/add', function(req, res) {
